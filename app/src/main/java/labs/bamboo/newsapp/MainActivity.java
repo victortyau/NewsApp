@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.ViewGroup;
 import android.widget.ListView;
@@ -29,8 +30,17 @@ public class MainActivity extends AppCompatActivity {
         ListView newsListView = findViewById(R.id.newsListView);
         Intent intent = new Intent(Intent.ACTION_VIEW);
 
+        Uri.Builder builder = new Uri.Builder();
+        builder.scheme(getResources().getString(R.string.url_scheme))
+                .authority(getResources().getString(R.string.url_authority))
+                .appendPath(getResources().getString(R.string.url_path))
+                .appendQueryParameter(getResources().getString(R.string.url_q), getResources().getString(R.string.url_debate))
+                .appendQueryParameter(getResources().getString(R.string.url_tag),getResources().getString(R.string.url_politics))
+                .appendQueryParameter(getResources().getString(R.string.url_date), getResources().getString(R.string.url_date_value))
+                .appendQueryParameter(getResources().getString(R.string.url_api_key),getResources().getString(R.string.url_api_key_value));
+
         try {
-            arrayList = new GetNews().execute("https://content.guardianapis.com/search?q=debate&tag=politics/politics&from-date=2014-01-01&api-key=test").get();
+            arrayList = new GetNews().execute(builder.build().toString()).get();
 
             if ( arrayList != null ) {
 
