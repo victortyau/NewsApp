@@ -2,11 +2,9 @@ package labs.bamboo.newsapp;
 
 import android.os.AsyncTask;
 import android.util.Log;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,11 +15,10 @@ import java.util.ArrayList;
 
 public class GetNews extends AsyncTask<String, Void, ArrayList<String[]>> {
 
-    private ArrayList currentNewsList = new ArrayList<String[]>();
-
     @Override
     protected ArrayList<String[]> doInBackground(String... params) {
         String jsonStr = null;
+        ArrayList currentNewsList = new ArrayList<String[]>();
 
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
