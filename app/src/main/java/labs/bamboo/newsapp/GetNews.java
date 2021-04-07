@@ -59,7 +59,10 @@ public class GetNews extends AsyncTask<String, Void, ArrayList<String[]>> {
                 for(int i = 0; i < newsList.length(); i++ ) {
                     JSONObject currentRow = newsList.getJSONObject(i);
                     if (!currentRow.getString("webTitle").equals("null") ) {
-                        currentNewsList.add( new String[] { currentRow.getString("webTitle"),  currentRow.getString("webUrl") });
+                        currentNewsList.add( new String[] { currentRow.getString("webTitle"),
+                                currentRow.getString("webUrl"),
+                                currentRow.getString("sectionName"),
+                                currentRow.getString("webPublicationDate") });
                     }
                 }
             } catch(JSONException ex) {
