@@ -24,9 +24,7 @@ public class GetNews extends AsyncTask<String, Void, ArrayList<String[]>> {
         BufferedReader reader = null;
 
         try {
-
             URL url = new URL(params[0]);
-
             urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestMethod("GET");
             urlConnection.connect();
@@ -83,7 +81,6 @@ public class GetNews extends AsyncTask<String, Void, ArrayList<String[]>> {
                 }
             }
         }
-
         return currentNewsList;
     }
 }
