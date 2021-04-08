@@ -1,7 +1,9 @@
 package labs.bamboo.newsapp;
 
-import android.os.AsyncTask;
+
+import android.content.Context;
 import android.util.Log;
+import androidx.loader.content.AsyncTaskLoader;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,18 +15,23 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 
-public class GetNews extends AsyncTask<String, Void, ArrayList<String[]>> {
+public class GetNews extends AsyncTaskLoader<ArrayList<String[]>> {
+
+    private final String urlString;
+
+    public GetNews( Context context , String urlString) {
+        super(context);
+        this.urlString = urlString;
+    }
 
     @Override
-    protected ArrayList<String[]> doInBackground(String... params) {
+    public ArrayList<String[]> loadInBackground() {
+        ArrayList<String[]> currentNewsList = new ArrayList<String[]>();
         String jsonStr = null;
-        ArrayList currentNewsList = new ArrayList<String[]>();
-
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
-
         try {
-            URL url = new URL(params[0]);
+            URL url = new URL(urlString);
             urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestMethod("GET");
             urlConnection.connect();
@@ -40,14 +47,10 @@ public class GetNews extends AsyncTask<String, Void, ArrayList<String[]>> {
 
             String currentLine;
             while ((currentLine = reader.readLine()) != null) {
-                // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
-                // But it does make debugging a *lot* easier if you print out the completed
-                // buffer for debugging.
                 buffer.append(currentLine + "\n");
             }
 
             if (buffer.length() == 0) {
-                // Stream was empty.  No point in parsing.
                 jsonStr = null;
             }
 
@@ -58,11 +61,22 @@ public class GetNews extends AsyncTask<String, Void, ArrayList<String[]>> {
                 JSONArray newsList = jsonObj.getJSONObject("response").getJSONArray("results");
                 for(int i = 0; i < newsList.length(); i++ ) {
                     JSONObject currentRow = newsList.getJSONObject(i);
+                    String currentAuthor = "";
                     if (!currentRow.getString("webTitle").equals("null") ) {
+                        JSONArray arrayTags = currentRow.getJSONArray("tags");
+                        if (arrayTags != null) {
+                            if ( arrayTags.length() > 0 ) {
+                                JSONObject currentTags = arrayTags.getJSONObject(0);
+                                currentAuthor = currentTags.getString("webTitle");
+                            }
+                        }
+
                         currentNewsList.add( new String[] { currentRow.getString("webTitle"),
                                 currentRow.getString("webUrl"),
                                 currentRow.getString("sectionName"),
-                                currentRow.getString("webPublicationDate") });
+                                currentRow.getString("webPublicationDate"),
+                                currentAuthor
+                        });
                     }
                 }
             } catch(JSONException ex) {
