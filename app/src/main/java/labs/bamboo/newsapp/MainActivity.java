@@ -6,7 +6,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -26,11 +30,13 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private Uri.Builder builder;
     private final ArrayList<NewsView> arrayListNews = new ArrayList<>();
     private final Intent intent = new Intent(Intent.ACTION_VIEW);
-
+    private static final String DEBUG_TAG = "NetworkStatusExample";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
 
         builder = new Uri.Builder();
         builder.scheme(getResources().getString(R.string.url_scheme))
@@ -42,7 +48,33 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 .appendQueryParameter(getResources().getString(R.string.url_show_tags), getResources().getString(R.string.url_contributor))
                 .appendQueryParameter(getResources().getString(R.string.url_api_key),getResources().getString(R.string.url_api_key_value));
 
-        getSupportLoaderManager().initLoader(1, null, this).forceLoad();
+
+
+        ConnectivityManager connMgr =
+                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        boolean isWifiConn = false;
+        boolean isMobileConn = false;
+
+        for (Network network : connMgr.getAllNetworks()) {
+            NetworkInfo networkInfo = connMgr.getNetworkInfo(network);
+            if (networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
+                isWifiConn |= networkInfo.isConnected();
+            }
+            if (networkInfo.getType() == ConnectivityManager.TYPE_MOBILE) {
+                isMobileConn |= networkInfo.isConnected();
+            }
+        }
+
+        if (isWifiConn || isMobileConn ) {
+            getSupportLoaderManager().initLoader(1, null, this).forceLoad();
+        }else{
+            RelativeLayout mainActivity = findViewById(R.id.mainActivity);
+            TextView textView = new TextView(this);
+            textView.setText(getResources().getString(R.string.no_internet_connect));
+            textView.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            textView.setGravity(Gravity.CENTER);
+            mainActivity.addView(textView);
+        }
     }
 
     @NonNull
